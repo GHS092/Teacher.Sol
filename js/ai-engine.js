@@ -1,3 +1,16 @@
+// ai-engine.js
+import OpenAI from 'openai';
+
+const apiKey = "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"; // Reemplaza con tu API key de OpenRouter
+const baseUrl = "https://openrouter.ai/api/v1";
+const model = "openai/gpt-4o"; // Puedes cambiar el modelo si lo deseas
+
+const client = new OpenAI({
+  apiKey: apiKey,
+  baseURL: baseUrl,
+  dangerouslyAllowBrowser: true //Necesario para el entorno del navegador
+});
+
 export class AIEngine {
   constructor() {
     this.systemPrompt = `You are Elizabeth García, a dedicated and creative English teacher.
@@ -68,11 +81,11 @@ Hi! My name is Elizabeth García and I'll be your English teacher.
   async getResponse(message) {
     try {
       let contextualPrompt = '';
-      
+
       // Initial greeting and name request
       if (this.conversationHistory.length === 0) {
         contextualPrompt = `As Elizabeth García, warmly greet the student and ask for their name. Introduce yourself as their English teacher.`;
-      } 
+      }
       // After getting name, ask about learning goals
       else if (!this.studentInfo.name && this.conversationHistory.length === 2) {
         this.studentInfo.name = message;
@@ -91,18 +104,28 @@ Hi! My name is Elizabeth García and I'll be your English teacher.
       // Keep conversation history manageable
       this.conversationHistory = this.conversationHistory.slice(-10);
 
-      const completion = await websim.chat.completions.create({
+      const completion = await client.chat.completions.create({
+        model: model,
         messages: [
           {
             role: "system",
             content: this.systemPrompt
           },
           ...this.conversationHistory
-        ]
+        ],
+        stream: false, // Deshabilitar el streaming para simplificar
+        extra_headers: {
+            "HTTP-Referer": "http://finanzas-ghs.onrender.com", // Reemplaza con la URL de tu sitio
+            "X-Title": "English with Elizabeth", // Reemplaza con el nombre de tu sitio
+        }
       });
 
-      this.conversationHistory.push(completion);
-      return completion.content;
+      this.conversationHistory.push({
+        role: "assistant",
+        content: completion.choices[0].message.content
+      });
+
+      return completion.choices[0].message.content;
 
     } catch (error) {
       console.error('Error getting AI response:', error);
