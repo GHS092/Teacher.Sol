@@ -1,16 +1,3 @@
-// ai-engine.js
-import OpenAI from 'openai';
-
-const apiKey = "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"; // Reemplaza con tu API key de OpenRouter
-const baseUrl = "https://openrouter.ai/api/v1";
-const model = "openai/gpt-4o"; // Puedes cambiar el modelo si lo deseas
-
-const client = new OpenAI({
-  apiKey: apiKey,
-  baseURL: baseUrl,
-  dangerouslyAllowBrowser: true //Necesario para el entorno del navegador
-});
-
 export class AIEngine {
   constructor() {
     this.systemPrompt = `You are Elizabeth García, a dedicated and creative English teacher.
@@ -104,32 +91,45 @@ Hi! My name is Elizabeth García and I'll be your English teacher.
       // Keep conversation history manageable
       this.conversationHistory = this.conversationHistory.slice(-10);
 
-      const completion = await client.chat.completions.create({
-        model: model,
-        messages: [
-          {
-            role: "system",
-            content: this.systemPrompt
-          },
-          ...this.conversationHistory
-        ],
-        stream: false, // Deshabilitar el streaming para simplificar
-        extra_headers: {
-            "HTTP-Referer": "http://finanzas-ghs.onrender.com", // Reemplaza con la URL de tu sitio
-            "X-Title": "English with Elizabeth", // Reemplaza con el nombre de tu sitio
-        }
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer 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', // Nueva API key
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'http://localhost:8080', // Ajusta según tu URL local (puedes cambiarlo a tu URL de Render después)
+          'X-Title': 'English with Elizabeth'
+        },
+        body: JSON.stringify({
+          // Descomenta la opción que quieras usar:
+          // Opción 1: Usar OpenAI GPT-4o (pago, pero puede ser más estable)
+          // model: 'openai/gpt-4o',
+          // Opción 2: Usar Gemini Pro 2.0 Experimental (gratis, según tu captura)
+          model: 'google/gemini-2.0-flash-lite-preview-02-05:free',
+          messages: [
+            { role: "system", content: this.systemPrompt },
+            ...this.conversationHistory
+          ],
+          stream: false
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`Error en la API: ${response.status} - ${await response.text()}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
 
       this.conversationHistory.push({
         role: "assistant",
-        content: completion.choices[0].message.content
+        content: aiResponse
       });
 
-      return completion.choices[0].message.content;
+      return aiResponse;
 
     } catch (error) {
       console.error('Error getting AI response:', error);
-      return "Lo siento, hubo un error. Please try again. Por favor, intenta de nuevo.";
+      return `Lo siento, hubo un error: ${error.message}. Please try again. Por favor, intenta de nuevo.`;
     }
   }
 
