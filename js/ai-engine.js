@@ -94,17 +94,13 @@ Hi! My name is Elizabeth García and I'll be your English teacher.
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer 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', // Nueva API key
+          'Authorization': 'Bearer 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', // Tu API key
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:8080', // Ajusta según tu URL local (puedes cambiarlo a tu URL de Render después)
+          'HTTP-Referer': 'https://teacher-sol.onrender.com', // Ajustado para la URL de Render
           'X-Title': 'English with Elizabeth'
         },
         body: JSON.stringify({
-          // Descomenta la opción que quieras usar:
-          // Opción 1: Usar OpenAI GPT-4o (pago, pero puede ser más estable)
-          // model: 'openai/gpt-4o',
-          // Opción 2: Usar Gemini Pro 2.0 Experimental (gratis, según tu captura)
-          model: 'google/gemini-2.0-flash-lite-preview-02-05:free',
+          model: 'google/gemini-2.0-flash-lite-preview-02-05:free', // Modelo confirmado que funciona
           messages: [
             { role: "system", content: this.systemPrompt },
             ...this.conversationHistory
