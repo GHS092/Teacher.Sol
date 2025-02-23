@@ -94,7 +94,7 @@ Hi! My name is Elizabeth García and I'll be your English teacher.
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer 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', // Tu API key
+          'Authorization': 'Bearer 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', // Tu API key
           'Content-Type': 'application/json',
           'HTTP-Referer': 'https://teacher-sol.onrender.com', // Ajustado para la URL de Render
           'X-Title': 'English with Elizabeth'
