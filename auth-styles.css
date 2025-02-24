@@ -1,0 +1,347 @@
+#auth-container {
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  font-family: 'Roboto', sans-serif;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 450px;
+  padding: 48px 40px 36px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+.auth-form:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.google-logo {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.google-logo img {
+  width: 100px;
+  height: auto;
+}
+
+.auth-form h1 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.3333;
+  margin-bottom: 8px;
+  color: #202124;
+}
+
+.auth-form h2 {
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  color: #202124;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 24px;
+  width: 100%;
+  min-width: 320px;
+}
+
+.form-group input {
+  width: 100%;
+  height: 56px;
+  padding: 13px 15px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #202124;
+  transition: all 0.2s, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #5f6368;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  background: #fff;
+  padding: 0 4px;
+}
+
+.form-group input:focus,
+.form-group input:not(:placeholder-shown) {
+  border-color: #1a73e8;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+  top: 0;
+  font-size: 12px;
+  color: #1a73e8;
+}
+
+.form-group.error input {
+  border-color: #dc2626;
+}
+
+.form-group.error label {
+  color: #dc2626;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  display: none;
+}
+
+.form-group.error .error-message {
+  display: block;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  width: 100%;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px;
+  cursor: pointer;
+  letter-spacing: 0.25px;
+}
+
+.text-button:hover {
+  background-color: rgba(26, 115, 232, 0.04);
+}
+
+.primary-button {
+  background-color: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 24px;
+  height: 36px;
+  min-width: 80px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primary-button:hover {
+  background-color: #1557b0;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.welcome-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.welcome-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.welcome-message {
+  background: white;
+  padding: 32px 48px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.welcome-overlay.show .welcome-message {
+  transform: scale(1);
+}
+
+.welcome-message h2 {
+  color: #1a73e8;
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.welcome-message p {
+  color: #5f6368;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.welcome-icon {
+  width: 64px;
+  height: 64px;
+  background: #e8f0fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.welcome-icon i {
+  font-size: 32px;
+  color: #1a73e8;
+}
+
+.logout-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.logout-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.logout-modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  max-width: 400px;
+  width: 90%;
+}
+
+.logout-modal.show .logout-modal-content {
+  transform: scale(1);
+}
+
+.logout-icon {
+  width: 64px;
+  height: 64px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.logout-icon i {
+  font-size: 32px;
+  color: #dc2626;
+}
+
+.logout-modal h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.logout-modal p {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.logout-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logout-modal button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-modal .cancel-button {
+  background: #f3f4f6;
+  border: none;
+  color: #374151;
+}
+
+.logout-modal .cancel-button:hover {
+  background: #e5e7eb;
+}
+
+.logout-modal .confirm-button {
+  background: #dc2626;
+  border: none;
+  color: white;
+}
+
+.logout-modal .confirm-button:hover {
+  background: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .auth-form {
+    padding: 24px;
+    border: none;
+  }
+  
+  .form-group {
+    min-width: 280px;
+  }
+  
+  .google-logo img {
+    width: 90px;
+  }
+}
