@@ -1,0 +1,15 @@
+{
+  "name": "english-with-elizabeth",
+  "version": "1.0.0",
+  "description": "English learning app with Elizabeth",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2"
+  }
+}
