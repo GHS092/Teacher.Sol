@@ -41,6 +41,7 @@ Prompt:
 
     Response Format:
     - Always include titles and content in this format:
+      <strong>Bienvenida</strong>
       <strong>Español:</strong>
       [Spanish text]
 
@@ -90,18 +91,31 @@ Prompt:
     try {
       let contextualPrompt = '';
 
-      // Initial greeting and name request
-      if (this.conversationHistory.length === 0) {
-        contextualPrompt = `As Elizabeth García, warmly greet the student and ask for their name. Introduce yourself as their English teacher.`;
+      // Handle greetings or ambiguous messages
+      if (message.toLowerCase().includes('hola') || message.toLowerCase().includes('hi')) {
+        if (this.studentInfo.name) {
+          contextualPrompt = `As Elizabeth García, warmly greet ${this.studentInfo.name} and ask how they are or what they want to learn today.`;
+        } else {
+          contextualPrompt = `As Elizabeth García, warmly greet the student and ask for their name. Introduce yourself as their English teacher.`;
+        }
       }
       // After getting name, ask about learning goals
-      else if (!this.studentInfo.name && this.conversationHistory.length === 2) {
-        this.studentInfo.name = message;
-        contextualPrompt = `The student's name is "${message}". Ask about their motivation for learning English. Mention this is a personalized course.`;
+      else if (!this.studentInfo.name && this.conversationHistory.length >= 1) {
+        this.studentInfo.name = message.trim(); // Ensure message is clean
+        contextualPrompt = `The student's name is "${this.studentInfo.name}". Ask about their motivation for learning English. Mention this is a personalized course.`;
       }
-      // Assess current level
-      else if (!this.studentInfo.level && this.studentInfo.name) {
-        contextualPrompt = `Based on their response, ask a simple question to assess their current English level. Keep it casual and encouraging.`;
+      // Assess current level or handle follow-ups
+      else if (this.studentInfo.name && !this.studentInfo.level) {
+        if (message.toLowerCase().includes('motiv') || message.toLowerCase().includes('quiero')) {
+          this.studentInfo.goals = message; // Store goals for context
+          contextualPrompt = `Based on "${message}", ask a simple question to assess ${this.studentInfo.name}'s current English level. Keep it casual and encouraging.`;
+        } else {
+          contextualPrompt = `Respond to ${this.studentInfo.name}'s message: "${message}" with a follow-up question about their motivation for learning English or their English level.`;
+        }
+      }
+      // Handle further conversation
+      else {
+        contextualPrompt = `Continue the conversation with ${this.studentInfo.name} based on their message: "${message}". Use their goals ("${this.studentInfo.goals || 'learning English'}") and maintain a warm, encouraging tone as their English teacher.`;
       }
 
       this.conversationHistory.push({
@@ -112,16 +126,20 @@ Prompt:
       // Keep conversation history manageable
       this.conversationHistory = this.conversationHistory.slice(-10);
 
+      // Depuración temporal (puedes quitar después)
+      console.log('Conversation History:', this.conversationHistory);
+      console.log('Student Info:', this.studentInfo);
+
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, // Usamos variable de entorno
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://teacher-sol.onrender.com', // Ajustado para Render
+          'HTTP-Referer': 'http://localhost:3000', // Ajustado para pruebas locales (cámbialo a Render después)
           'X-Title': 'English with Elizabeth'
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-lite-preview-02-05:free', // Modelo confirmado que funciona
+          model: 'google/gemini-2.0-pro-exp-02-05:free', // Modelo confirmado que funciona
           messages: [
             { role: "system", content: this.systemPrompt },
             ...this.conversationHistory
@@ -135,7 +153,20 @@ Prompt:
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      // Depuración para ver la estructura completa de la respuesta
+      console.log('API Response:', data);
+
+      // Intenta diferentes estructuras de respuesta para Grok
+      let aiResponse = '';
+      if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+        aiResponse = data.choices[0].message.content || 'No response from AI';
+      } else if (data.response) { // Intenta con un posible formato alternativo
+        aiResponse = data.response || 'No response from AI';
+      } else if (data.text) { // Intenta con otro formato posible
+        aiResponse = data.text || 'No response from AI';
+      } else {
+        throw new Error('Unexpected API response format: No choices, response, or message found');
+      }
 
       this.conversationHistory.push({
         role: "assistant",
@@ -164,12 +195,14 @@ Prompt:
   }
 }
 
+// Crea una instancia global de AIEngine
+const ai = new AIEngine();
+
 // Endpoint para manejar mensajes del chat
 app.post('/api/chat', express.json(), async (req, res) => {
-  const ai = new AIEngine();
   const message = req.body.message;
-  const response = await ai.getResponse(message);
-  res.json({ response });
+  const response = await ai.getResponse(message); // Usa la misma instancia
+  res.json({ response: response }); // Asegúrate de devolver un objeto con la propiedad 'response'
 });
 
 // Sirve el frontend
