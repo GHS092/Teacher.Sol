@@ -114,7 +114,7 @@ Ejemplo de interacción inicial:
         'X-Title': 'English with Elizabeth'
       },
       body: JSON.stringify({
-        model: 'google/gemini-pro',
+        model: 'google/gemini-2.0-flash-lite-preview-02-05:free',
         messages: messages,
         stream: false,
         ...(json ? { json: true } : {})
