@@ -136,7 +136,7 @@ class AIEngine {
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:3000',
+        'HTTP-Referer': 'https://teacher-sol.onrender.com', // Ajusta a tu URL en Render
         'X-Title': 'English with Elizabeth'
       },
       body: JSON.stringify({
@@ -148,6 +148,7 @@ class AIEngine {
     });
 
     if (!response.ok) {
+      console.error('OpenRouter Error:', await response.text()); // Depuración
       throw new Error(`Error en la API: ${response.status} - ${await response.text()}`);
     }
 
