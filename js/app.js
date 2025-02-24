@@ -360,9 +360,9 @@ async function initializeApp() {
           chatTitleElement.classList.add('chat-title-active');
           
           // Animate the title change
-          chatTitleElement.style.animation = 'none';
+          chatTitleElement.classList.add('title-updating');
           chatTitleElement.offsetHeight; // Trigger reflow
-          chatTitleElement.style.animation = 'titleUpdate 0.5s ease';
+          setTimeout(() => chatTitleElement.classList.remove('title-updating'), 500); // Duración de la animación
         }
       } else if (currentChat.messages.length === 2) {
         // Initial title from first message
@@ -423,20 +423,6 @@ async function initializeApp() {
       chatHistoryPanel.classList.add('hidden');
     }
   });
-  
-  const styleSheet = document.styleSheets[0];
-  styleSheet.insertRule(`
-    @keyframes titleUpdate {
-      0% { 
-        opacity: 0.5;
-        transform: translateY(-2px);
-      }
-      100% { 
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `, styleSheet.cssRules.length);
 }
 
 // Start the application
