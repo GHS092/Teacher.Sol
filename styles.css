@@ -856,3 +856,19 @@
     padding: 8px 12px;
   }
 }
+
+/* Añadir al final */
+@keyframes titleUpdate {
+  0% { 
+    opacity: 0.5;
+    transform: translateY(-2px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-title.title-updating {
+  animation: titleUpdate 0.5s ease;
+}
