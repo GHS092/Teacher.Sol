@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Supabase - GHS Finanzas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .result-container {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .btn-group {
+            margin-bottom: 20px;
+        }
+        .btn-group .btn {
+            margin-right: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .status-indicator {
+            height: 15px;
+            width: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-success {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        .status-pending {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prueba de Conexión con Supabase</h1>
+        
+        <div class="d-flex align-items-center mb-3">
+            <span>Estado de conexión: </span>
+            <span class="status-indicator ms-2 status-pending" id="connectionStatus"></span>
+            <span id="connectionStatusText" class="ms-2">Pendiente</span>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="supabaseUrl">URL de Supabase:</label>
+                    <input type="text" class="form-control" id="supabaseUrl" value="https://heeouytcsqhsdxexnamx.supabase.co" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="supabaseKey">Clave de API:</label>
+                    <input type="text" class="form-control" id="supabaseKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZW91eXRjc3Foc2R4ZXhuYW14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNTYyMDIsImV4cCI6MjA1NzgzMjIwMn0.G09UaAUlso-1y50cJS6lcvOemjXt83b-vRBZI6VY6UI" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="btn-group mb-4">
+            <button id="testConnectionBtn" class="btn btn-primary">Probar Conexión</button>
+            <button id="viewTablesBtn" class="btn btn-info">Ver Tablas</button>
+            <button id="resetDatabaseBtn" class="btn btn-danger">Reiniciar BD</button>
+            <button id="runDebugBtn" class="btn btn-warning">Ejecutar Diagnóstico</button>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="testsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="auth-tab" data-bs-toggle="tab" data-bs-target="#auth" type="button" role="tab">Autenticación</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab">Datos</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="testsTabsContent">
+                    <div class="tab-pane fade show active" id="auth" role="tabpanel">
+                        <h5 class="card-title">Pruebas de Autenticación</h5>
+                        
+                        <div class="form-group">
+                            <label for="testEmail">Email:</label>
+                            <input type="email" class="form-control" id="testEmail" placeholder="usuario@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="testPassword">Contraseña:</label>
+                            <input type="password" class="form-control" id="testPassword" placeholder="Contraseña">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="testUsername">Nombre de Usuario (solo para registro):</label>
+                            <input type="text" class="form-control" id="testUsername" placeholder="Nombre de usuario">
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button id="signUpBtn" class="btn btn-success">Registrarse</button>
+                            <button id="signInBtn" class="btn btn-secondary">Iniciar Sesión</button>
+                            <button id="signOutBtn" class="btn btn-outline-danger">Cerrar Sesión</button>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="data" role="tabpanel">
+                        <h5 class="card-title">Pruebas de Datos</h5>
+                        
+                        <div class="form-group mb-3">
+                            <label for="tableSelect">Seleccionar Tabla:</label>
+                            <select class="form-control" id="tableSelect">
+                                <option value="profiles">Perfiles</option>
+                                <option value="transactions">Transacciones</option>
+                                <option value="categories">Categorías</option>
+                                <option value="savings">Ahorros</option>
+                                <option value="teams">Equipos</option>
+                            </select>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button id="queryBtn" class="btn btn-primary">Consultar Datos</button>
+                            <button id="insertBtn" class="btn btn-success">Insertar Ejemplo</button>
+                            <button id="deleteBtn" class="btn btn-danger">Eliminar Todo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="resultOutput">Resultados:</label>
+            <div class="result-container">
+                <pre id="resultOutput">// Los resultados se mostrarán aquí</pre>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="supabase_debug.js"></script>
+    <script>
+        // Cliente de Supabase
+        let supabase = null;
+        let currentUser = null;
+        
+        // Inicializar Supabase
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const supabaseUrl = document.getElementById('supabaseUrl').value;
+                const supabaseKey = document.getElementById('supabaseKey').value;
+                
+                // Crear cliente de Supabase usando la biblioteca global
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                log("Cliente de Supabase inicializado correctamente");
+                
+                // Comprobar estado de autenticación actual
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    currentUser = session.user;
+                    log(`Sesión activa para: ${currentUser.email}`);
+                    updateConnectionStatus(true);
+                } else {
+                    log("No hay sesión activa");
+                    updateConnectionStatus(true); // La conexión puede estar bien aunque no haya sesión
+                }
+            } catch (error) {
+                log(`Error al inicializar Supabase: ${error.message}`);
+                updateConnectionStatus(false);
+            }
+        });
+        
+        // Event Listeners
+        document.getElementById('testConnectionBtn').addEventListener('click', testConnection);
+        document.getElementById('viewTablesBtn').addEventListener('click', viewTables);
+        document.getElementById('resetDatabaseBtn').addEventListener('click', resetDatabase);
+        document.getElementById('signUpBtn').addEventListener('click', signUp);
+        document.getElementById('signInBtn').addEventListener('click', signIn);
+        document.getElementById('signOutBtn').addEventListener('click', signOut);
+        document.getElementById('queryBtn').addEventListener('click', queryData);
+        document.getElementById('insertBtn').addEventListener('click', insertSampleData);
+        document.getElementById('deleteBtn').addEventListener('click', deleteAllData);
+        document.getElementById('runDebugBtn').addEventListener('click', runDebugTests);
+        
+        // Funciones
+        async function testConnection() {
+            try {
+                clearLog();
+                log("Probando conexión a Supabase...");
+                
+                if (!supabase) {
+                    throw new Error("El cliente de Supabase no está inicializado correctamente");
+                }
+                
+                const { data, error } = await supabase.from('profiles').select('*').limit(1);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log("✅ Conexión exitosa a Supabase!");
+                log(`Datos de muestra: ${JSON.stringify(data)}`);
+                updateConnectionStatus(true);
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function viewTables() {
+            try {
+                clearLog();
+                log("Obteniendo información de tablas...");
+                
+                const tables = ['profiles', 'transactions', 'categories', 'savings', 'teams'];
+                
+                for (const table of tables) {
+                    const { data, error } = await supabase
+                        .from(table)
+                        .select('*')
+                        .limit(1);
+                    
+                    if (error) {
+                        log(`❌ Error al consultar tabla ${table}: ${error.message}`);
+                    } else {
+                        // Intentar obtener la cantidad de registros
+                        const { count, error: countError } = await supabase
+                            .from(table)
+                            .select('*', { count: 'exact', head: true });
+                        
+                        const recordCount = countError ? 'desconocido' : count;
+                        log(`✅ Tabla ${table} encontrada. Registros: ${recordCount}`);
+                    }
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function resetDatabase() {
+            if (!confirm('¿Estás seguro de que quieres reiniciar la base de datos? Esto eliminará todos los datos existentes.')) {
+                return;
+            }
+            
+            try {
+                clearLog();
+                log("Reiniciando base de datos...");
+                
+                // Cargar el script SQL desde el archivo
+                log("No es posible ejecutar scripts SQL directamente desde el navegador.");
+                log("Por favor, accede al panel de administración de Supabase y ejecuta el script supabase_trigger.sql desde el SQL Editor.");
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function runDebugTests() {
+            try {
+                clearLog();
+                log("Iniciando diagnóstico completo...");
+                
+                // Asegurarse de que el objeto de depuración está cargado
+                if (!window.supabaseDebug) {
+                    throw new Error("La herramienta de diagnóstico (supabase_debug.js) no está cargada correctamente.");
+                }
+                
+                // Inicializar la herramienta de depuración con el cliente existente
+                window.supabaseDebug.supabase = supabase;
+                
+                // Ejecutar pruebas
+                log("Ejecutando pruebas de conexión...");
+                await window.supabaseDebug.testConnection();
+                
+                log("Ejecutando verificación de políticas RLS...");
+                await window.supabaseDebug.checkRLS();
+                
+                log("Ejecutando verificación de estructura de tablas...");
+                await window.supabaseDebug.checkTableStructure();
+                
+                log("✅ Diagnóstico completado. Revisa los resultados en la consola del navegador (F12) para más detalles.");
+            } catch (error) {
+                log(`❌ Error en el diagnóstico: ${error.message}`);
+            }
+        }
+        
+        async function signUp() {
+            try {
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+                const username = document.getElementById('testUsername').value || email.split('@')[0];
+                
+                if (!email || !password) {
+                    throw new Error('Por favor, ingresa email y contraseña');
+                }
+                
+                clearLog();
+                log(`Registrando usuario: ${email}...`);
+                
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            username
+                        }
+                    }
+                });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                currentUser = data.user;
+                log(`✅ Usuario registrado exitosamente!`);
+                log(`ID de usuario: ${data.user.id}`);
+                log(`Nota: Es posible que necesites confirmar tu email antes de poder iniciar sesión.`);
+                
+                // Verificar si el perfil se ha creado
+                setTimeout(async () => {
+                    const { data: profileData, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id);
+                    
+                    if (profileError || !profileData || profileData.length === 0) {
+                        log(`⚠️ No se encontró un perfil automático. Creando manualmente...`);
+                        
+                        // Crear perfil manualmente
+                        const { error: insertError } = await supabase
+                            .from('profiles')
+                            .insert([
+                                {
+                                    id: data.user.id,
+                                    username,
+                                    email,
+                                    is_admin: false
+                                }
+                            ]);
+                        
+                        if (insertError) {
+                            log(`❌ Error al crear perfil: ${insertError.message}`);
+                        } else {
+                            log(`✅ Perfil creado manualmente!`);
+                        }
+                    } else {
+                        log(`✅ Perfil creado automáticamente!`);
+                    }
+                }, 2000);
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function signIn() {
+            try {
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+                
+                if (!email || !password) {
+                    throw new Error('Por favor, ingresa email y contraseña');
+                }
+                
+                clearLog();
+                log(`Iniciando sesión: ${email}...`);
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                currentUser = data.user;
+                log(`✅ Inicio de sesión exitoso!`);
+                log(`ID de usuario: ${data.user.id}`);
+                log(`Email: ${data.user.email}`);
+                
+                // Obtener el perfil
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', data.user.id);
+                
+                if (profileError) {
+                    log(`❌ Error al obtener perfil: ${profileError.message}`);
+                } else if (!profileData || profileData.length === 0) {
+                    log(`⚠️ No se encontró un perfil para este usuario.`);
+                } else {
+                    log(`✅ Perfil encontrado:`);
+                    log(JSON.stringify(profileData[0], null, 2));
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function signOut() {
+            try {
+                clearLog();
+                log("Cerrando sesión...");
+                
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    throw error;
+                }
+                
+                currentUser = null;
+                log("✅ Sesión cerrada exitosamente!");
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function queryData() {
+            try {
+                const table = document.getElementById('tableSelect').value;
+                
+                clearLog();
+                log(`Consultando datos de la tabla '${table}'...`);
+                
+                const { data, error } = await supabase
+                    .from(table)
+                    .select('*')
+                    .limit(10);
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log(`✅ Datos obtenidos (${data.length} registros):`);
+                log(JSON.stringify(data, null, 2));
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function insertSampleData() {
+            try {
+                if (!currentUser) {
+                    throw new Error('Debes iniciar sesión para insertar datos');
+                }
+                
+                const table = document.getElementById('tableSelect').value;
+                
+                clearLog();
+                log(`Insertando datos de ejemplo en la tabla '${table}'...`);
+                
+                let sampleData;
+                let result;
+                
+                switch (table) {
+                    case 'profiles':
+                        log("⚠️ No se pueden insertar perfiles de ejemplo directamente");
+                        return;
+                    case 'transactions':
+                        sampleData = {
+                            type: 'entrada',
+                            cost_type: 'fijo',
+                            amount: 1000,
+                            category: 'Salario',
+                            date: new Date().toISOString().split('T')[0],
+                            description: 'Transacción de prueba',
+                            user_id: currentUser.id
+                        };
+                        break;
+                    case 'categories':
+                        sampleData = {
+                            name: 'Categoría de prueba ' + new Date().getTime(),
+                            type: 'entrada',
+                            user_id: currentUser.id
+                        };
+                        break;
+                    case 'savings':
+                        sampleData = {
+                            amount: 500,
+                            description: 'Ahorro de prueba',
+                            date: new Date().toISOString().split('T')[0],
+                            user_id: currentUser.id
+                        };
+                        break;
+                    case 'teams':
+                        sampleData = {
+                            name: 'Equipo de prueba ' + new Date().getTime(),
+                            code: 'EQ' + Math.floor(Math.random() * 10000),
+                            password: 'password123',
+                            creator_id: currentUser.id
+                        };
+                        break;
+                }
+                
+                result = await supabase.from(table).insert([sampleData]).select();
+                
+                if (result.error) {
+                    throw result.error;
+                }
+                
+                log(`✅ Datos insertados exitosamente:`);
+                log(JSON.stringify(result.data[0], null, 2));
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function deleteAllData() {
+            try {
+                if (!currentUser) {
+                    throw new Error('Debes iniciar sesión para eliminar datos');
+                }
+                
+                const table = document.getElementById('tableSelect').value;
+                
+                if (!confirm(`¿Estás seguro de que quieres eliminar TODOS TUS datos de la tabla '${table}'?`)) {
+                    return;
+                }
+                
+                clearLog();
+                log(`Eliminando datos de la tabla '${table}'...`);
+                
+                // Solo eliminar datos del usuario actual para mayor seguridad
+                let result;
+                
+                switch (table) {
+                    case 'profiles':
+                        log("⚠️ No se pueden eliminar perfiles directamente");
+                        return;
+                    default:
+                        result = await supabase
+                            .from(table)
+                            .delete()
+                            .eq('user_id', currentUser.id);
+                }
+                
+                if (result.error) {
+                    throw result.error;
+                }
+                
+                log(`✅ Datos eliminados exitosamente de la tabla '${table}'`);
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Utilidades
+        function log(message) {
+            const output = document.getElementById('resultOutput');
+            output.textContent += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('resultOutput').textContent = '';
+        }
+        
+        function updateConnectionStatus(isConnected) {
+            const statusIndicator = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('connectionStatusText');
+            
+            if (isConnected) {
+                statusIndicator.className = 'status-indicator ms-2 status-success';
+                statusText.textContent = 'Conectado';
+            } else {
+                statusIndicator.className = 'status-indicator ms-2 status-error';
+                statusText.textContent = 'Error de conexión';
+            }
+        }
+    </script>
+</body>
+</html> 
